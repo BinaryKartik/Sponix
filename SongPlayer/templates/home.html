@@ -1,0 +1,15 @@
+   {% extends "base.html" %}
+   {% block content %}
+<style>
+  img{
+    height: 91vh;
+    width:91vw;
+    padding-top:10px;
+  }
+</style>
+<center>
+  <a href="/songs">
+<img id="img" src="{{url_for('static', filename = 'SPONIX.gif')}}">
+  </a>  
+</center>
+{% endblock %}

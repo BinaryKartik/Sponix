@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Playlists{% endblock %}
+{% block content %}
+<style>
+    body{
+        background-color: #272424;
+    }
+</style>
+<div class="playlist">
+  {% if user.admin %}
+<form method="POST">
+        <center><input type="text" id="playlist" name="playlist" placeholder="Spotify Link">
+        <button type="submit">Search</button></center>
+  </form>
+{% endif %}
+    {% if playlists %}
+        {% for i in range(playlists|length)%}
+        <center class='infoc'>
+            <div class="inform">
+            <b class="playlist_names {{ i }}">{{ playlists[i] }}</b>
+            </div>
+        </center>
+        {% endfor %}
+      </div>
+    {% endif %}
+</div>
+{% endblock %}

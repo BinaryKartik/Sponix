@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+{% block title %}Sponix - Search Songs{% endblock %}
+{% block content %}
+    <style>
+        body{
+            animation: reveal 700ms;
+        }
+        @font-face {
+            font-family: "Azonix";
+            src: url("{{url_for('static', filename = 'Azonix.otf')}}");
+        }
+        :root{
+            --text-primary: #b6b6b6;
+            --text-secondary: #ececec;
+            --bg-primary: #23232e;
+            --bg-secondary: #141418;
+            font-size: 16px;
+            font-family: 'Libre Baskerville', serif;
+        }
+        h1{
+            font-family: 'Azonix', fantasy;
+        }
+        body{
+            background-color: #272424;
+            margin: 0;
+            padding: 0;
+        }
+        @media only screen and (max-width: 600px){
+            .navbar{
+                bottom: 0%;
+                width: 100vw;
+                height: 5rem;
+            }
+            .logo{
+                display: none;
+            }
+            .info{
+                font-size: 10px;
+                width: inherit;
+                margin-top: 20px;
+                padding-top: 0;
+                padding: 0 10px;
+              line-height: 1pc;
+              border-radius: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-top: 1px solid rgba(255, 255, 255, 0.5);
+              border-left: 1px solid rgba(255, 255, 255, 0.5);
+              backdrop-filter: blur(5px);
+              color: white;
+              letter-spacing: 2px;
+            }
+            .login{
+                width: 100vw;
+                background-color: white;
+                flex-direction: column;
+                min-height: 100vh;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+            .close-button{
+                position: absolute;
+                top: 30px;
+                right: 30px;
+                transform: scale(2);
+                cursor: pointer;
+            }
+            .login-form button[type = "submit"]{
+                
+                margin-top: 5%;
+            }
+            .login-form input{
+                margin: 0 0 5% -3%;
+                width: 80%;
+            }
+            .login h1{
+                margin: 0;
+            }
+            #file{
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+        @media only screen and (max-width: 1174px) and (min-width: 600px){
+            .info{
+                width: 100vw;
+                float: left;
+                font-size: 15px;
+                width: inherit;
+                margin-top: 20px;
+                padding-top: 0;
+                padding: 0 10px;
+              line-height: 1pc;
+              border-radius: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-top: 1px solid rgba(255, 255, 255, 0.5);
+              border-left: 1px solid rgba(255, 255, 255, 0.5);
+              backdrop-filter: blur(5px);
+              color: white;
+              letter-spacing: 2px;
+            }}
+        .infoc img{
+            width: 40%;
+        }
+        @media only screen and (min-width:989px){
+            .info{
+                box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
+              float: right;
+              width: 30%;
+              line-height: 2pc;
+              margin: 60px 50px 55px 0;
+              border-radius: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-top: 1px solid rgba(255, 255, 255, 0.5);
+              border-left: 1px solid rgba(255, 255, 255, 0.5);
+              backdrop-filter: blur(5px);
+              color: white;
+              letter-spacing: 2.5px;
+                margin-right: 10%;
+                margin-bottom: 50px;
+            }
+        }
+        @media only screen and (min-width: 600px) {
+            .login{
+                margin-top: 10%;
+                width: 60vw;
+                background-color: white;
+                left: 20%;
+                flex-direction: column;
+                min-height: 50vh;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .close-button{
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: scale(2);
+            }
+            .close-button{
+                cursor: pointer;
+            }
+            .login-form button[type = "submit"]{
+                margin-left: 40%;
+                margin-top: 5%;
+            }
+            .login-form input{
+                margin: 0 0 10% -5%;
+                width: 120%;
+            }
+        }
+        audio::-webkit-media-controls-panel{
+            background-color: #383c3c;
+        }
+        audio::-webkit-media-controls-mute-button{
+            background-color: #3636b1;
+            border-radius: 50%;
+        }
+        audio::-webkit-media-controls-play-button{
+            background-color: white;
+            border-radius: 50%;
+            transition: 1s;
+        }
+        audio::-webkit-media-controls-play-button:hover{
+            background-color: rgb(110, 119, 119);
+        }
+        audio::-webkit-media-controls-current-time-display {
+            color: #fff;
+            font-family: "Azonix";
+          }          
+        audio::-webkit-media-controls-time-remaining-display {
+            color: #fff;
+            font-family: "Azonix";
+          }
+          audio::-webkit-media-controls-timeline {
+            background-color: rgba(210, 48, 224, 0.76);
+            border-radius: 25px;
+            margin-right: 5px;
+            margin-left: 5px;
+          }
+          audio{
+              width: 90%;
+              margin-bottom: 30px;
+          }
+          .infoc img{
+              max-width: 80%;
+              min-width: 40%;
+              max-height: 80%;
+              min-height: 40%;
+              border-radius: 8%;
+              margin-bottom: 70px;
+              border-width: 6px;
+              box-shadow: 0 8px 16px 0 rgb(0, 0, 0);
+              border-style: groove;
+              border-color: rgb(0, 162, 255);
+              margin-top: 50px;
+              margin-left: 100px;
+              z-index: 2;
+              float: left;
+          }
+          .info:root{
+            background: rgba(255, 255, 255, 0.1);
+          }
+          @media (max-width: 900px){
+            .infoc img{
+                margin: 2.5%;
+                width: 60%;
+                margin-left: 20%;
+            }
+          .form{
+              border-radius: 25px;
+          }}
+          input{
+              border-radius: 25px;
+              padding-left: 10px;
+              height: 30px;
+              margin-top: 2%;
+              font-family: cursive, fantasy;
+              width: 60%;
+              background-color: white;
+              font-size: 15px;
+          }
+          form button{
+              border-radius: 25px;
+              font-family: 'Azonix';
+              height: 35px;
+              z-index: 2;
+              width: 90px;
+              color: rgb(22, 89, 145);
+              background-image: -webkit-linear-gradient(right, #12c2e9, #c471ed, #f64f59, #f64f59, #c471ed, #12c2e9);
+              cursor: pointer;
+              background-size: 300%;
+              background-position: left;
+              transition: 0.6s background-position ease-in-out;
+          }
+          button:hover{
+              background-position: right; 
+          }
+          ::-webkit-input-placeholder{
+              font-size: 15px;
+          }
+          .header{
+              height: 20%;
+              width: 100%;
+              background-color: linear-gradient(rgba(0, 0, 0, 0.452), rgba(0, 0, 0, 2));
+          }
+          .infoc{
+              text-align: center;
+              justify-content: center;}
+         #playlist{
+             border: 3px rgb(0, 58, 250);
+             height: 30px;
+             background-color: rgb(0, 58, 250);
+             border-radius: 8px;
+             cursor: pointer;
+             color: rgb(255, 255, 255);
+             transition: box-shadow 2s;
+         }
+         #playlist:hover{
+             border: red;
+             box-shadow: 0px 5px 10px rgb(255, 76, 76), 0px 10px 40px rgb(248, 0, 0);
+         }
+         .button{
+             display: flex;
+             justify-content: center;
+             min-height: 10vh;
+             align-items: center;
+             flex-direction: column;
+         }
+         .a{
+             position: relative;
+             display: inline-block;
+             padding: 1.7rem 1.9rem;
+             color: #03e9f4;
+             font-size: 1.5rem;
+             text-decoration: none;
+             text-transform: uppercase;
+             overflow: hidden;
+             transition: 0.5s;
+             margin-bottom: 25px;
+             cursor: pointer;
+         }
+         .a:hover{
+             background: #03e9f4;
+             color: #050801;
+             box-shadow: 0 0 5px #03e9f4,
+                         0 0 25px #03e9f4,
+                         0 0 50px #03e9f4,
+                         0 0 5px #03e9f4;
+         }
+         .a span{
+             position: absolute;
+             display: block;
+         }
+         .a span:nth-child(1){
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 2px;
+             background: linear-gradient(90deg, transparent, #03e9f4);
+             animation: move1 1s linear infinite;
+         }
+         @keyframes move1{
+             0%{left: -100%;}
+             50%, 100%{left: 100%;}
+         }
+         .a span:nth-child(2){
+            top: -100%;
+            right: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, #03e9f4);
+            animation: move2 1s linear infinite 0.25s;
+        }
+        @keyframes move2{
+            0%{top: -100%;}
+            50%, 100%{top: 100%;}
+        }
+        .a span:nth-child(3){
+            bottom: 0;
+            right: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(180deg, transparent, #03e9f4);
+            animation: move3 1s linear infinite 0.5s;
+        }
+        @keyframes move3{
+            0%{right: -100%;}
+            50%, 100%{right: 100%;}
+        }
+      
+.chat-bar-collapsible {
+    position: fixed;
+    bottom: 0;
+    right: 50px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.collapsible {
+    background-color: #030EFF;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 350px;
+    text-align: left;
+    outline: none;
+    font-size: 18px;
+    border-radius: 10px 10px 0px 0px;
+    border: 3px solid white;
+    border-bottom: none;
+}
+
+.content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    background-color: #f1f1f1;
+}
+
+.full-chat-block {
+    width: 350px;
+    background: rgb(255,0,206);
+    background: linear-gradient(315deg, rgba(255,0,206,1) 0%, rgba(0,14,255,1) 100%);
+    text-align: center;
+    overflow: auto;
+    scrollbar-width: none;
+    height: max-content;
+    transition: max-height 0.2s ease-out;
+}
+
+.outer-container {
+    min-height: 300px;
+    bottom: 0%;
+    position: relative;
+}
+
+.chat-container {
+    max-height: 300px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    scroll-behavior: smooth;
+    hyphens: auto;
+}
+
+.chat-container::-webkit-scrollbar {
+    display: none;
+}
+
+.chat-bar-input-block {
+    display: flex;
+    float: left;
+    box-sizing: border-box;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    background-color: rgb(235, 235, 235);
+    border-radius: 10px 10px 0px 0px;
+    padding: 10px 0px 10px 10px;
+}
+
+.chat-bar-icons {
+    display: flex;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+    width: 25%;
+    float: right;
+    font-size: 20px;
+}
+
+#chat-icon:hover {
+    opacity: .7;
+}
+
+/* Chat bubbles */
+
+#userInput {
+    width: 75%;
+}
+
+.input-box {
+    float: left;
+    border: none;
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 16px;
+    color: #000;
+    background-color: white;
+    outline: none
+}
+
+.userText {
+    color: white;
+    font-family: Helvetica;
+    font-size: 16px;
+    font-weight: normal;
+    text-align: right;
+    clear: both;
+}
+
+.userText span {
+    line-height: 1.5em;
+    display: inline-block;
+    background: #5ca6fa;
+    padding: 10px;
+    border-radius: 8px;
+    border-bottom-right-radius: 2px;
+    max-width: 80%;
+    margin-right: 10px;
+    animation: floatup .5s forwards
+}
+
+.botText {
+    color: #fff;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: left;
+}
+.lrc-text{
+  transition: color 0.8s;
+}
+.col{
+  color:black;
+}
+.botText span {
+    line-height: 1.5em;
+    display: inline-block;
+    max-width: 80%;
+    margin-left: 20px;
+    animation: floatup .5s forwards
+}
+.not{
+  color:#757873
+}
+
+@keyframes floatup {
+    from {
+        transform: translateY(14px);
+        opacity: .0;
+    }
+    to {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
+@media screen and (max-width:600px) {
+    .full-chat-block {
+        width: 100%;
+        border-radius: 0px;
+    }
+    .chat-bar-collapsible {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+    }
+    .collapsible {
+        width: 100%;
+        border: 0px;
+        border-top: 3px solid white;
+        border-radius: 0px;
+    }
+}
+        .a span:nth-child(4){
+            top: -100%;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, #03e9f4);
+            animation: move4 1s linear infinite 0.75s;
+      }
+        @keyframes move4{
+            0%{top: 100%;}
+            50%, 100%{top: -100%;}
+        }
+        i{
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    {% if not user.is_authenticated %}
+    <div class="login" id="login">
+        <h1 class="form-head">Login</h1>
+     <form class="login-form" method="post">
+    <label for="email"><b>Email</b></label><br>
+    <input type="text" id="email" placeholder=" Enter Email" name="email" required>
+<br>
+    <label for="psw"><b>Password</b></label><br>
+    <input type="password" id="pass" minlength="7" placeholder=" Enter Password" name="pass" required>
+<br><i>Don't have an account? <a href="/sign_up">Sign-Up</a></i>
+    <br><button type="submit" class="btn">Login</button>
+    </form>
+    </div>
+    {% endif %}
+    <main>
+    <div class="form">
+    <form method="POST">
+        <center><input type="text" id="song" name="song" placeholder="Song Name">
+        <button type="submit">Search</button></center>
+    </form></div>
+    <div class="container">
+        {% if url %}
+        <center class='infoc'>
+            <img id="img1" src={{ img }}>
+            <div class="info">
+            <b id="name">{{ name }}</b>
+            <ul align="left">
+            <li>Published By {{ publish }}</li>
+            </ul>
+        </center></div>
+        <center><audio class={{ song }} type="audio/mp3" id="file" controls src={{ url }} ></audio></center>
+        <div class="button">
+        <a class="a" id="anchor1" onclick="set()">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Add to a playlist
+        </a></div>
+        {% elif error %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+    <div class="chat-bar-collapsible">
+        <button id="chat-button" type="button" class="collapsible">Lyrics
+            <i id="chat-icon" style="color: #fff;" class="fa fa-solid fa-music"></i>
+        </button>
+
+        <div class="content">
+            <div class="full-chat-block">
+                <!-- Message Container -->
+                <div id="out"class="outer-container">
+                    <div id="in" class="chat-container">
+                        <!-- Lyrics -->
+                      {% if lcs != "NO" %}
+                      {% for i in lcs2 %}
+                        <div id={{ lcs2.index(i)|string+"chatbox" }}>
+                            <h5 id="chat-timestamp"></h5>
+                            <p id="botStarterMessage" 
+                              class="botText"><span id={{ lcs2.index(i) }} class="lrc-text">
+                              {% if i == "" %}
+                              ♪♪♪
+                              {% else %}
+                              {{ i }}
+                              {% endif %}
+                            </span></p>
+                        </div>
+                      
+{% endfor %}
+                      {% else %}
+                      <div>
+                            <h5 id="chat-timestamp"></h5>
+                            <p id="botStarterMessage" 
+                              class="botText"><span class="lrc-text not">
+                              No lyrics availaible
+                            </span></p>
+                        </div>
+                      {% endif %}
+                        <div id="chat-bar-bottom">
+                            <p></p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>var coll = document.getElementsByClassName("collapsible");
+
+for (let i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function () {
+        this.classList.toggle("active");
+
+        var content = this.nextElementSibling;
+
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+
+    });
+}
+        var aud = document.getElementById("file")
+        var retry = 0
+        keywords = [" lyrics", " remix", " song", " full video"]
+  try{
+  aud.onerror = async function() {
+    var query = '{{ song }}'
+    const response = await fetch('https://sponix.kartikcoder.repl.co/songs/' + query + keywords[retry]);
+    var data = await response.json();
+    aud.setAttribute("src", data["url"])
+    retry += 1
+  }
+  }
+  catch{
+        }
+      var element = ""
+    const scroll = (i) =>{
+      element = document.getElementById(i.toString());
+try{
+var position = $('#'+i+"chatbox").offset().top - $('#in').offset().top + $('#in').scrollTop();
+        $("#in").animate({
+            scrollTop: position
+        }, 500);
+  element.classList.add("col");
+}catch{console.log(i)}
+      
+
+    }
+    var lcs = '{{ lcs }}'
+    if (lcs != "NO"){
+    lcs = lcs.replace("[", "")
+    lcs = lcs.replace("]", "")  
+    lcs = lcs.replaceAll("&#39;", "")
+    lcs = lcs.replaceAll(" ", "")
+    lcs = lcs.split(",")
+    var lcss = []
+    var x, m, s;
+    for (let i = 0; i < lcs.length; i++) {
+      x = lcs[i].split(".")
+      if (parseInt(x[1]) > 50){
+        m = x[0].split(":")
+        s = parseInt(m[1])+1
+        lcss.push(m[0]+"."+s.toString())
+      }
+      else{
+        m = x[0].split(":")
+        lcss.push(m[0]+"."+m[1])
+      }
+    }
+    var m,ele, cur, cur1;
+    console.log(lcss)
+  aud.addEventListener("timeupdate", (event) =>{
+    cur = aud.currentTime
+    console.log(cur)
+    if (cur >60){
+      cur1 = cur%60
+      cur = Math.floor(cur/60)
+      cur = cur.toString()+ "." + cur1.toString()
+    }
+    else{
+    cur = cur.toString()
+    cur = cur.split(".")[0]}
+    var k, x;
+    for (let i = 0; i < lcss.length; i++) {
+      cur = cur.toString()
+      if (cur.includes(".")){
+        k = lcss[i].split(".")
+        if (parseInt(k[0]) == parseInt(cur.split(".")[0])){
+          if(parseInt(k[1]) == parseInt(cur.split(".")[1])){
+    console.log(cur, k)
+    console.log("yes")
+    scroll(lcss.indexOf(k.join(".")))
+      }}
+      }
+      else{
+        x  = lcss[i].toString()
+        if(x.includes("00.")){
+        if (parseInt(cur) == parseInt(x.split(".")[1])){
+
+    console.log("yes")
+    scroll(lcss.indexOf(x))
+      }}}}})};
+      </script>
+    {% endblock %}
+    </main>

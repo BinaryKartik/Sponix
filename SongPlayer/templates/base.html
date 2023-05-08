@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://kit.fontawesome.com/84bb9dfb4d.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{url_for('static', filename = 'favicon.png')}}">
+    <style>
+        body{
+            animation: reveal 700ms;
+            opacity: 1;
+            transition: opacity 700ms;
+            background-color: #000;
+        }
+        @font-face {
+            font-family: "Azonix";
+            src: url("{{url_for('static', filename = 'Azonix.otf')}}");
+        }
+        :root{
+            --text-primary: #b6b6b6;
+            --text-secondary: #ececec;
+            --bg-primary: #23232e;
+            --bg-secondary: #141418;
+            font-size: 16px;
+            font-family: 'Libre Baskerville', serif;
+        }
+        h1{
+            font-family: 'Azonix', fantasy;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        main{
+            margin-left: 5rem;
+            padding: 1rem;
+        }
+        body::-webkit-scrollbar{
+            width: 0.35rem;
+        }
+        body::-webkit-scrollbar-track{
+            background: #1e1e24;
+            border-radius: 8px;
+        }
+        body::-webkit-scrollbar-thumb{
+            background: #6648b8;
+            border-radius: 8px;
+        }
+        .navbar{
+            position: fixed;
+            background-color: var(--bg-primary);
+            transition: 200ms ease width;
+            z-index: 1000;
+        }
+        .navbar-nav{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-item{
+            width: 100%;
+        }
+        .nav-link{
+            display: flex;
+            align-items: center;
+            height: 5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            filter: grayscale(100%) opacity(0.7);
+            transition: 600ms;
+        }
+        .link-text{
+            display: none;
+            margin-left: 1rem;
+        }
+        .nav-link i{
+            font-size: 2rem;
+            margin: 0 1.5rem;
+        }
+        .nav-link i{
+            color: #ff7eee;
+            border: 2px #df49a6;
+            transition: 600ms;
+        }
+        .logo{
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            font-size: 1.5rem;
+            letter-spacing: 0.3ch;
+            width: 100%;
+        }
+        .logo svg{
+            transform: rotate(0deg) scale(0.6);
+            transition: transform 600ms;
+        }
+        @media only screen and (max-width: 600px){
+            .navbar{
+                display: none;
+                bottom: 0%;
+                width: 100vw;
+                height: 5rem;
+            }
+            .logo{
+                display: none;
+            }
+            .navbar-nav{
+                flex-direction: row;
+            }
+            .nav-link{
+                justify-content: center;
+            }
+            main{
+                margin: 0%;
+            }
+            #preloader{
+                background-size: 20%;
+            }
+        }
+        @media only screen and (min-width: 600px) {
+            .navbar{
+                top: 0;;
+                width: 5rem;
+                height: 100vh;
+            }
+            .navbar:hover{
+                width: 16rem;
+            }
+            .nav-link:hover{
+                filter: grayscale(0%) opacity(1);
+                background: var(--bg-secondary);
+                color: var(--text-secondary);
+            }
+            .navbar:hover .link-text{
+                display: block;
+            }
+            .navbar:hover .logo svg{
+                transform: rotate(-180deg) scale(0.6);
+            }
+            .navbar:hover .fa-primary{
+                color: #ff7eee;
+            }
+            .navbar:hover .fa-secondary{
+                color: #df49a6;
+            }
+            #preloader{
+                background-size: 7%;
+            }
+        }
+        #preloader{
+            background: #fff url("{{url_for('static', filename = 'Hourglass.gif')}}") no-repeat center center;
+            height: 100vh;
+            width: 100%;
+            position: fixed;
+            z-index: 100;
+            opacity: 1;
+        }
+        .top-cont{
+            background: #000 url("{{url_for('static', filename = 'bg1.jpg')}}");
+            color: #fff;
+            height: 80vh;
+            width: 100%;
+            background-size: cover;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        .overlay{
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            opacity: 0.7;
+            background: #000;
+        }
+        .top-cont h1{
+            z-index: 1;
+            margin-top: 10%;
+            font-size: 70px;
+            letter-spacing: 1.2pc;
+        }
+        .top-cont h6{
+            z-index: 1;
+            margin-top: 16%;
+            position: absolute;
+            font-size: 20px;
+            letter-spacing: 1.2pc;
+            font-family: "Azonix", cursive;
+        }
+        .features{
+            display: flex;
+            flex-direction: row;
+            margin-top: 25%;
+            position: absolute;
+            z-index: 1;
+            width: 100%;
+            margin-left: 17%;
+            list-style: none;
+        }
+        .feature-items{
+            background-color: #272424;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 10%;
+            padding: 2% 0;
+            border-radius: 50%;
+            margin-right: 300px;
+        }
+        @keyframes reveal {
+            from{opacity: 0.2;}
+            to{opacity: 1;}
+        }
+        </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="navbar-nav">
+            <li class="logo">
+                <a href="#" class="nav-link">
+                    <span class="link-text logo-text">
+                        Sponix
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      data-prefix="fad"
+                      data-icon="angle-double-right"
+                      role="img"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 448 512"
+                      class="svg-inline--fa fa-angle-double-right fa-w-14 fa-5x"
+                    >
+                      <g class="fa-group">
+                        <path
+                          fill="currentColor"
+                          d="M224 273L88.37 409a23.78 23.78 0 0 1-33.8 0L32 386.36a23.94 23.94 0 0 1 0-33.89l96.13-96.37L32 159.73a23.94 23.94 0 0 1 0-33.89l22.44-22.79a23.78 23.78 0 0 1 33.8 0L223.88 239a23.94 23.94 0 0 1 .1 34z"
+                          class="fa-secondary"
+                        ></path>
+                        <path
+                          fill="currentColor"
+                          d="M415.89 273L280.34 409a23.77 23.77 0 0 1-33.79 0L224 386.26a23.94 23.94 0 0 1 0-33.89L320.11 256l-96-96.47a23.94 23.94 0 0 1 0-33.89l22.52-22.59a23.77 23.77 0 0 1 33.79 0L416 239a24 24 0 0 1-.11 34z"
+                          class="fa-primary"
+                        ></path>
+                      </g>
+                    </svg>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span class="link-text">Home</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/songs" class="nav-link">
+                    <i class="fas fa-search"></i>
+                    <span class="link-text">Search</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/playlists" class="nav-link">
+                    <i class="fab fa-playstation"></i>
+                    <span class="link-text">Playlists</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span class="link-text">{{ user.name }}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <main>
+        {% block content %}
+        {% endblock %}
+        </main>
+        <script type="text/javascript" src="{{ url_for('static', filename='vanilla-tilt.js') }}"></script>
+    <script>
+        VanillaTilt.init(document.querySelector(".info"), {
+            max: 20,
+            speed: 400,
+            glare: true,
+            'max-glare': 0.5
+        });
+        VanillaTilt.init(document.querySelector(".search-res"), {
+            max: 1,
+            speed: 400,
+            glare: true,
+            'max-glare': 0.5
+        });
+    const img = document.getElementById("img")
+  if (window.innerWidth < "600"){
+    img.setAttribute("src", "{{url_for('static', filename = 'SPONIX2.gif')}}")
+  }
+    </script>
+        <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+</body>
+</html>

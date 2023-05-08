@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% block title %}{{ play }}{% endblock %}
+{% block content %}
+    <style>
+        body{
+            animation: reveal 700ms;
+        }
+        @font-face {
+            font-family: "Azonix";
+            src: url("{{url_for('static', filename = 'Azonix.otf')}}");
+        }
+        :root{
+            --text-primary: #b6b6b6;
+            --text-secondary: #ececec;
+            --bg-primary: #23232e;
+            --bg-secondary: #141418;
+            font-size: 16px;
+            font-family: 'Libre Baskerville', serif;
+        }
+        h1{
+            font-family: 'Azonix', fantasy;
+        }
+        body{
+            background-color: #272424;
+            margin: 0;
+            padding: 0;
+        }
+        @media only screen and (max-width: 600px){
+            .navbar{
+                bottom: 0%;
+                width: 100vw;
+                height: 5rem;
+            }
+            .logo{
+                display: none;
+            }
+            .inform{
+                font-size: 5px;
+            }
+            .login{
+                width: 100vw;
+                background-color: white;
+                flex-direction: column;
+                min-height: 100vh;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+            .close-button{
+                position: absolute;
+                top: 30px;
+                right: 30px;
+                transform: scale(2);
+                cursor: pointer;
+            }
+            .login-form button[type = "submit"]{
+                
+                margin-top: 5%;
+            }
+            .login-form input{
+                margin: 0 0 5% -3%;
+                width: 80%;
+            }
+            .login h1{
+                margin: 0;
+            }
+        }
+        @media only screen and (max-width: 1174px) and (min-width: 600px){
+            .inform{
+                flex-direction: column;
+                display: flex;
+                font-size: 15px;
+                width: 30%;
+                padding: 25px 10px;
+              box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
+              line-height: 1pc;
+              margin: 0px 30px 35px 0;
+              border-radius: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-top: 1px solid rgba(255, 255, 255, 0.5);
+              border-left: 1px solid rgba(255, 255, 255, 0.5);
+              backdrop-filter: blur(5px);
+              color: white;
+              letter-spacing: 2px;
+        }}
+        .infoc img{
+            width: 40%;
+        }
+        @media only screen and (min-width: 600px) {
+            .inform{
+                padding: 35px 20px;
+              box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
+              float: right;
+              width: 30%;
+              line-height: 2pc;
+              margin: 55px 50px 55px 0;
+              border-radius: 15px;
+              background: rgba(255, 255, 255, 0.1);
+              border-top: 1px solid rgba(255, 255, 255, 0.5);
+              border-left: 1px solid rgba(255, 255, 255, 0.5);
+              backdrop-filter: blur(5px);
+              color: white;
+              letter-spacing: 2.5px;
+                margin-right: 10%;
+                margin-bottom: 50px;
+            }
+          .info-container:last-child{
+            margin-bottom:200px;
+          }
+            .login{
+                margin-top: 10%;
+                width: 60vw;
+                background-color: white;
+                left: 20%;
+                flex-direction: column;
+                min-height: 50vh;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .close-button{
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: scale(2);
+            }
+            .close-button{
+                cursor: pointer;
+            }
+            .login-form button[type = "submit"]{
+                margin-left: 40%;
+                margin-top: 5%;
+            }
+            .login-form input{
+                margin: 0 0 10% -5%;
+                width: 120%;
+            }
+        }
+        audio::-webkit-media-controls-panel{
+            background-color: #383c3c;
+        }
+        audio::-webkit-media-controls-mute-button{
+            background-color: #3636b1;
+            border-radius: 50%;
+        }
+        audio::-webkit-media-controls-play-button{
+            background-color: white;
+            border-radius: 50%;
+            transition: 1s;
+        }
+        audio::-webkit-media-controls-play-button:hover{
+            background-color: rgb(110, 119, 119);
+        }
+        audio::-webkit-media-controls-current-time-display {
+            color: #fff;
+            font-family: "Azonix";
+          }          
+        audio::-webkit-media-controls-time-remaining-display {
+            color: #fff;
+            font-family: "Azonix";
+          }
+          audio::-webkit-media-controls-timeline {
+            background-color: rgba(210, 48, 224, 0.76);
+            border-radius: 25px;
+            margin-right: 5px;
+            margin-left: 5px;
+          }
+          main{
+              margin: 0;
+          }
+          #player{
+              background-color: black;
+              position: fixed;
+              height: 200px;
+              width: 100%;
+              margin-left: 80px;
+              padding: 0%;
+              display: flex;
+              align-items: center;
+              align-self: center;
+              justify-content: center;
+              bottom:0;
+          }
+          audio{
+              width: 70%;
+          }
+          .infoc img{
+              max-width: 20%;
+              min-width: 10%;
+              max-height: 20%;
+              min-height: 10%;
+              border-radius: 6%;
+              margin-bottom: 70px;
+              border-width: 6px;
+              box-shadow: 0 8px 16px 0 rgb(0, 0, 0);
+              border-style: groove;
+              margin-top: 50px;
+              margin-left: 100px;
+              float: left;
+          }
+          .inform:root{
+            background: rgba(255, 255, 255, 0.1);
+          }
+          @media (max-width: 900px){
+            .infoc img{
+                margin: 2.5%;
+                width: 10%;
+                margin-left: 20%;
+            }
+          .form{
+              border-radius: 25px;
+          }}
+          input{
+              border-radius: 25px;
+              padding-left: 10px;
+              height: 30px;
+              margin-top: 2%;
+              font-family: cursive, fantasy;
+              width: 60%;
+              background-color: white;
+              font-size: 15px;
+          }
+          form button{
+              border-radius: 25px;
+              font-family: 'Azonix';
+              height: 35px;
+              z-index: 2;
+              width: 90px;
+              color: rgb(22, 89, 145);
+              background-image: -webkit-linear-gradient(right, #12c2e9, #c471ed, #f64f59, #f64f59, #c471ed, #12c2e9);
+              cursor: pointer;
+              background-size: 300%;
+              background-position: left;
+              transition: 0.6s background-position ease-in-out;
+          }
+          button:hover{
+              background-position: right; 
+          }
+          ::-webkit-input-placeholder{
+              font-size: 15px;
+          }
+          .header{
+              height: 20%;
+              width: 100%;
+              background-color: linear-gradient(rgba(0, 0, 0, 0.452), rgba(0, 0, 0, 2));
+          }
+          .infoc{
+              display: flex;
+              text-align: center;
+              flex-direction: row;
+              justify-content: center;
+            }
+          .info-container{
+            margin-bottom:200px;
+          }
+         #playlist{
+             border: 3px rgb(0, 58, 250);
+             height: 30px;
+             background-color: rgb(0, 58, 250);
+             border-radius: 8px;
+             cursor: pointer;
+             color: rgb(255, 255, 255);
+             transition: box-shadow 2s;
+         }
+         #playlist:hover{
+             border: red;
+             box-shadow: 0px 5px 10px rgb(255, 76, 76), 0px 10px 40px rgb(248, 0, 0);
+         }
+         .button{
+             display: flex;
+             justify-content: center;
+             min-height: 10vh;
+             align-items: center;
+             flex-direction: column;
+         }
+        i{
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <main>
+    <div class="container">
+      <div class="info-container">
+        {% if songs %}
+        {% for i in range(songs|length)%}
+        <center class='infoc'>
+            <div class="inform">
+            <b class="song_names {{ i }}">{{ songs[i] }}</b>
+            <button id={{ i }} onclick="play(this.id)">Play</button><button id={{ i }} onclick="del(this.id)">Remove</button></div>
+        </center>
+        {% endfor %}
+      </div>
+        <div id ="player">
+        <audio id="songplayer" autoplay controls src=""></audio>
+    </div>
+        {% elif error %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+    <script>
+            var playlist = "{{ play }}"
+            var aud = document.getElementById("songplayer")
+            var gaana = ""
+            playlist = playlist.replace(" ", "%20")
+            const song_elements = document.getElementsByClassName("song_names")
+            var songs = []
+            for (index = 0; index < song_elements.length; index++) {
+                songs.push(song_elements[index].textContent);
+            }
+      function del(del_song) {
+        song_names = document.getElementsByClassName(String(del_song))[0].textContent
+        window.location.replace('/playlists/remove/' + song_names + "/" + playlist)
+      }
+        function play(e, t=1){
+          if (t == 0){
+            if (aud.currentTime==aud.duration){
+              if (songs.indexOf(gaana)< e){
+              gaana = songs[parseInt(e)]
+          console.log(gaana)
+              fetch('https://sponix.kartikcoder.repl.co/songs/' + gaana).then(
+                response => response.json()
+            ).then(data => setAll(data, e))
+            }}
+          }
+          else{
+          const gaana = songs[parseInt(e)]
+          console.log(gaana)
+            fetch('https://sponix.kartikcoder.repl.co/songs/' + gaana).then(
+                response => response.json()
+            ).then(data => setAll(data, e))
+          }          
+        }
+        function setAll(data, e){
+            aud.setAttribute("src", data.url)
+            var retry = 0
+            keywords = [" lyrics", " remix", " song", " full video"]
+            try{
+            aud.onerror = async function aud() {
+              var query = songs[parseInt(e)]
+              console.log(songs[parseInt(e)] + keywords[retry])
+              const response = await                   fetch('https://sponix.kartikcoder.repl.co/songs/' + query + keywords[retry]);
+              var data = await response.json();
+              aud.setAttribute("src", data["url"])
+              retry += 1
+            }
+          }
+          catch{
+        }
+          aud.addEventListener("ended", () =>{
+          play(parseInt(e) + 1, t=0)
+            })
+        }
+    </script>
+    {% endblock %}
