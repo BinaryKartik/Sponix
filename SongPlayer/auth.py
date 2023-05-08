@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for, request
 import json
 from flask.helpers import flash
+import urllib.request
 import requests
 from youtube_transcript_api import YouTubeTranscriptApi
 from difflib import SequenceMatcher
@@ -20,7 +21,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from flask_cors import cross_origin
 
-cluster = MongoClient(os.environ.get("mongo"), connect=False)
+cluster = MongoClient(os.environ.get("dbauth"), connect=False)
 db = cluster["sponix"]
 
 collection = db["login-user"]
@@ -67,145 +68,166 @@ song = ''
 repeat = 0
 
 
-def rclyrics(s, srt):
-    s += " lyrics"
-    s.replace(" ", "%20")
-    html = requests.get(f"https://rclyricsband.com/?s={s}").text
-    print(f"https://rclyricsband.com/?s={s}")
-    soup = BeautifulSoup(html, features="html.parser")
-    data = soup.find(class_='elementor-post__title')
-    data = data.find("a")["href"]
-    print(data)
-    m = SequenceMatcher(None, soup.find(class_='elementor-post__title').find("a").text, s).ratio()
-    if 0.55 < m:
-        html = requests.get(data).text
+def rclyrics(s):
+    try:
+        s += " lyrics"
+        s.replace(" ", "%20")
+        html = requests.get(f"https://rclyricsband.com/?s={s}").text
+        print(f"https://rclyricsband.com/?s={s}")
         soup = BeautifulSoup(html, features="html.parser")
-        data = soup.find(class_='su-box-content su-u-clearfix su-u-trim').text
-        backup = data
-        lrc = []
-        while data.find('[') != -1:
-            lrc.append(data[data.find('[') + 1:data.find(']')])
-            data = data.replace("[" + lrc[len(lrc) - 1] + "]", "")
-        for i in range(lrc.index("00:00.00")):
+        data = soup.find(class_='elementor-post__title')
+        data = data.find("a")["href"]
+        print(data)
+        hi = soup.find(class_='elementor-post__title').find("a").text
+        m = SequenceMatcher(None, hi, s).ratio()
+        print(hi.replace("PDF/LRC File", "") ,s, sep="\n")
+        if (0.55 < m) or (s.lower() in hi.lower()):
+            html = requests.get(data).text
+            soup = BeautifulSoup(html, features="html.parser")
+            data = soup.find(class_='su-box-content su-u-clearfix su-u-trim').text
+            backup = data
+            lrc = []
+            while data.find('[') != -1:
+                lrc.append(data[data.find('[') + 1:data.find(']')])
+                data = data.replace("[" + lrc[len(lrc) - 1] + "]", "")
+            for i in range(lrc.index("00:00.00")):
+                lrc.pop(0)
+            lrc2 = []
+            z = 0
+            for t in lrc:
+                z += 1
+                try:
+                    lrc2.append(backup[backup.find(t) + len(t) +
+                                    1:backup.find(lrc[z]) - 1])
+                except:
+                    break
             lrc.pop(0)
-        lrc2 = []
-        z = 0
-        for t in lrc:
-            z += 1
-            try:
-                lrc2.append(backup[backup.find(t) + len(t) +
-                                   1:backup.find(lrc[z]) - 1])
-            except:
-                break
-        lrc.pop(0)
-        if lrc2[0] == "":
-          lrc2.pop(0)
-    else:
-      lrc= lrc2= False
+            if lrc2[0] == "":
+                lrc2.pop(0)
+        else:
+            lrc2 = lrc= False
+    except Exception as e:
+       exc_type, exc_obj, exc_tb = sys.exc_info()
+       fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+       print(e,exc_type, fname, exc_tb.tb_lineno) 
+       lrc2 = lrc= False
     return lrc2, lrc
 
 
-def lyricsify(s, art, s3, srt):
-    print(s, art)
-    art = art.replace(" ", "-")
-    html = requests.get(f"https://www.lyricsify.com/lyrics/{art}",
-                        headers={
-                            'Accept': 'application/xml; charset=utf-8',
-                            'User-Agent': 'foo'
-                        }).text
-    soup = BeautifulSoup(html, features="html.parser")
-    data = soup.find_all(class_="li")
-    data2 = []
-    for t in data:
-        data2.append(t.find("a").text)
-    t = 0
-    ans = ""
-    for i in data2:
-        if s in i:
-            ans = i
-            t = 0.7
-            break
-        else:
-            s2 = i.replace(f"{art} - ", "")
-            print(s2)
-            m = SequenceMatcher(None, s2, s).ratio()
-            if t < m:
-                t = m
+def lyricsify(s, art, s3):
+    try:
+        art2 = art.replace(" ", "-")
+        html = requests.get(f"https://www.lyricsify.com/lyrics/{art2}",
+                            headers={
+                                'Accept': 'application/xml; charset=utf-8',
+                                'User-Agent': 'foo'
+                            }).text
+        soup = BeautifulSoup(html, features="html.parser")
+        data = soup.find_all(class_="li")
+        data2 = []
+        for t in data:
+            data2.append(t.find("a").text)
+        t = 0
+        ans = ""
+        for i in data2:
+            if s in i:
                 ans = i
-    link = data[data2.index(ans)]
-    if t < 0.6:
-        return rclyrics(s3, srt)
-    else:
-        return next2(link, srt)
+                t = 0.7
+                break
+            else:
+                s2 = i.replace(f"{art} - ", "")
+                m = SequenceMatcher(None, s2, s).ratio()
+                if t < m:
+                    t = m
+                    ans = i
+        link = data[data2.index(ans)]
+        if t < 0.6:
+            return rclyrics(s)
+        else:
+            return next2(link)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(e, exc_type, fname, exc_tb.tb_lineno)
+        return False,False
 
 
-def next2(link, srt):
-    
-    link = link.find("a")["href"]
-    print(link)
-    html = requests.get("https://www.lyricsify.com/" + link,
-                        headers={
-                            'Accept': 'application/xml; charset=utf-8',
-                            'User-Agent': 'foo'
-                        }).text
-    soup = BeautifulSoup(html, features="html.parser")
-    id = link[::-1].split(".")
-    id = id[0][::-1]
-    data = soup.find(id='lyrics_' + id + "_details").text
-    data2 = data.split("\n")
-    final = []
-    m2 = []
-    for m in data2:
-        try:
+def next2(link):
+    try:
+        link = link.find("a")["href"]
+        print(link)
+        html = requests.get("https://www.lyricsify.com/" + link,
+                            headers={
+                                'Accept': 'application/xml; charset=utf-8',
+                                'User-Agent': 'foo'
+                            }).text
+        soup = BeautifulSoup(html, features="html.parser")
+        id = link[::-1].split(".")
+        id = id[0][::-1]
+        data = soup.find(id='lyrics_' + id + "_details").text
+        data2 = data.split("\n")
+        final = []
+        m2 = []
+        for m in data2:
+            try:
                 if (data2[0][data2[0].find('[') + 1:data2[0].find(']')][2] == ":") and (data2[0][data2[0].find('[') + 1:data2[0].find(']')][5] == "."):
                     break
                 else:
                     data2.pop(0)
-        except:
+            except:
                 data2.pop(0)
-    for i in data2:
-        final.append(i[i.find('[') + 1:i.find(']')])
-        i = i.split("]")[1]
-        m2.append(i)
-    final2 = []
-    for s in m2:
-        if s == " ":
-            final2.append("")
-        else:
-            final2.append(s)
-    print(final2)
-    return final2, final
-
-
-def get_song(song):
-    global repeat
-    keywords = [" lyrics", " remix", " song", " full video"]
-    repeat += 1
-    try:
-        base = 'https://www.youtube.com'
-        result = YoutubeSearch(song, max_results=1).to_dict()
-        suffix = result[0]['url_suffix']
-        img = result[0]['thumbnails'][0]
-        name = result[0]['title']
-        publish = result[0]['channel']
-        views = result[0]['views']
-        date = result[0]['publish_time']
-        link = base + suffix
-        audio = pafy.new(link)
-        duration = result[0]['duration']
-        best = audio.getbestaudio()
-        playurl = best.url
-        repeat = 0
-        srt = YouTubeTranscriptApi.get_transcript(suffix)
-        # print(views, name, publish, date, playurl, img)
-        # if type(views) != str:
-        #   raise Exception("No song found")
-        return views, name, publish, date, playurl, img, duration, srt
+        print(data2)
+        for i in data2:
+            final.append(i[i.find('[') + 1:i.find(']')])
+            try:
+                i = i.split("]")[1]
+                m2.append(i)
+            except Exception as e:
+                print(e)
+                print(i)
+        final2 = []
+        print(m2, "m2")
+        for s in m2:
+            if s == " ":
+                final2.append("")
+            else:
+                final2.append(s)
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-        get_song(song + keywords[repeat])
+    print(final2, final, sep="\n")
+    return final2, final
+
+
+def get_song(song):
+    try:
+        name =sp.search(song, type='track',  market="IN", limit=1)
+        art = name["tracks"]['items'][0]['artists'][0]['name']
+        sng = name["tracks"]['items'][0]['name']
+        img = name["tracks"]['items'][0]['album']['images'][0]['url']
+        if "Various Artist" in art:
+            print("hello")
+            art = art[0]
+        base = 'https://www.youtube.com/watch?v='
+        html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + song.replace(" ", "%20"))
+        video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+        link = base + video_ids[0]
+        audio = pafy.new(link)
+        duration = audio.length
+        best = audio.getbestaudio()
+        playurl = best.url
+        # repeat = 0
+        # srt = YouTubeTranscriptApi.get_transcript(suffix)
+        # print(views, name, publish, date, playurl, img)
+        # if type(views) != str:
+        #   raise Exception("No song found")
+        return sng, art, playurl, img, duration
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        # get_song(song + keywords[repeat])
 
 
 @auth.route('/songs', methods=['GET', 'POST'])
@@ -217,21 +239,10 @@ def songs():
             print('pass2')
             song = request.form.get('song')
             try:
-                views, name, publish, date, playurl, img, duration, srt = get_song(song)
-                print(duration)
-                name2 =sp.search(song, type='track',  market="IN", limit=10)
-                # for m in name2["tracks"]['items']:
-                #   m["duration_ms"]
-                art = name2["tracks"]['items'][0]['artists'][0]['name']
-                sng = name2["tracks"]['items'][0]['name']
-                print(sng,art, sep="\n")
-                if "Various Artist" in art:
-                  print("hello")
-                  art = art[0]
-                  
+                name, publish, playurl, img, duration = get_song(song)
                 lcs2, lcs = lyricsify(
-                    sng,
-                    art, song, srt)
+                    name,
+                    publish, song)
                 if lcs:
                   for m in lcs2:
                    if not (bool(re.match('^[ ]+$', m)) or m == ""):
@@ -249,12 +260,10 @@ def songs():
                 return render_template('song.html',
                                        user=current_user,
                                        song=song,
-                                       views=views,
                                        name=name,
                                        publish=publish,
                                        lcs=lcs,
                                        lcs2=lcs2,
-                                       date=date,
                                        url=playurl,
                                        img=img,
                                        index="index.js")
@@ -354,13 +363,11 @@ def songs_find(song_name):
     if '%20' in song_name:
         song_name = song_name.replace('%20', ' ')
     try:
-        views, name, publish, date, playurl, img, duration, srt = get_song(song_name)
+        name, publish, playurl, img, duration, = get_song(song_name)
         return jsonify({
             "song": song,
-            "views": views,
             "name": name,
             "publish": publish,
-            "date": date,
             "url": playurl,
             "img": img
         })
