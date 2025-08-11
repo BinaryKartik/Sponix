@@ -154,6 +154,11 @@
                 width: 120%;
             }
         }
+        .aud_styl{
+            text-align: center;
+            justify-content: center;
+            justify-items: center;
+        }
         audio::-webkit-media-controls-panel{
             background-color: #383c3c;
         }
@@ -184,7 +189,8 @@
             margin-left: 5px;
           }
           audio{
-              width: 90%;
+              width: 30%;
+              
               margin-bottom: 30px;
           }
           .infoc img{
@@ -557,9 +563,16 @@
             <b id="name">{{ name }}</b>
             <ul align="left">
             <li>Published By {{ publish }}</li>
+            <li>Published On {{ date }}</li>
+            {% if pop<20 %}
+            <li>A hidden gemstone!</li>
+            {% elif pop<50 %}
+            <li>Whis is this so underrated?</li>
+            {% else %}
+            <li>Loved by the world</li>
+            {% endif %}
             </ul>
-        </center></div>
-        <center><audio class={{ song }} type="audio/mp3" id="file" controls src={{ url }} ></audio></center>
+        </center><div class="aud_styl"><audio class={{ song }} type="audio/mp3" id="file" controls src={{ url }} ></audio> </div>
         <div class="button">
         <a class="a" id="anchor1" onclick="set()">
             <span></span>
@@ -567,7 +580,10 @@
             <span></span>
             <span></span>
             Add to a playlist
-        </a></div>
+        </a>
+    </div>
+
+       
         {% elif error %}
         <p>{{ error }}</p>
         {% endif %}

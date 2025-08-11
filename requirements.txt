@@ -2,8 +2,8 @@ flask
 youtube-transcript-api
 spotipy
 youtube-search
-pafy
 flask_login
 bs4
+yt_dlp -- latest
 pymongo
 flask_cors

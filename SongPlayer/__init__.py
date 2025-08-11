@@ -22,6 +22,6 @@ def create_app():
     @login_manager.user_loader
     def user_loader(id):
         userloaded = collection.find_one({"_id":int(id)})
-        loaduser = User(email=userloaded["Email"], name=userloaded["Name"], password=userloaded["Password"], sign_up=False)
+        loaduser = User(email=userloaded["Email"], name=userloaded["Name"], password=userloaded["Password"])
         return loaduser
     return app
